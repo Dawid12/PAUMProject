@@ -15,7 +15,7 @@ import java.io.OutputStreamWriter;
 
 public class Configuration
 {
-    private JSONArray alphabet;
+    public JSONArray alphabet;
     private String directory;
     private String fileName;
     public Configuration(String directory, String fileName)
@@ -45,13 +45,16 @@ public class Configuration
             File file = new File(dir, fileName);
             FileOutputStream os = null;
             StringBuilder text = new StringBuilder();
+
             try
             {
                 BufferedReader br = new BufferedReader(new FileReader(file));
                 String line;
+
                 while ((line = br.readLine()) != null)
                 {
                     text.append(line);
+
                     text.append('\n');
                 }
                 br.close();
@@ -59,7 +62,7 @@ public class Configuration
             }
             catch (IOException e)
             {
-                //You'll need to add proper error handling here
+
             }
         }
         return "";
@@ -75,7 +78,6 @@ public class Configuration
         File file = new File(folder, fileName);
 
         // Save your stream, don't forget to flush() it before closing it.
-
         try
         {
             file.createNewFile();
