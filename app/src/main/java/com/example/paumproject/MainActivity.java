@@ -2,11 +2,13 @@ package com.example.paumproject;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -39,10 +42,11 @@ public class MainActivity extends AppCompatActivity  {
 
     private Map<String, List<Buttons>> alphabetMap =new TreeMap<>();
 
-    List<Buttons> currentSign = new ArrayList<>();
-    List<List<Buttons>> currentMessage = new ArrayList<>();
-    int numberOfErrors = 0;
+    private List<Buttons> currentSign = new ArrayList<>();
+    private String currentMessage = "";
+    private int numberOfErrors = 0;
 
+    private int currentNumberOfButtons = 0;
     private Button b1, b2, b3, b4;
 
     public enum Buttons
@@ -193,11 +197,10 @@ public class MainActivity extends AppCompatActivity  {
     private void manageReachedButton(View view) {
 
         Buttons current = Buttons.B1;
-
         try {
             // Assigning reached buttons to ENUMS and
-            if (view == b1) current = Buttons.B1;
-            else if (view == b2) current = Buttons.B2;
+            if (view == b1) assert true;
+            if (view == b2) current = Buttons.B2;
             else if (view == b3) current = Buttons.B3;
             else if (view == b4) current = Buttons.B4;
             else throw new Exception("Wrong value");
@@ -207,16 +210,92 @@ public class MainActivity extends AppCompatActivity  {
             e.printStackTrace();
         }
         currentSign.add(current);
+        currentNumberOfButtons++;
+        boolean isRight = false;
+        for (List<Buttons> combination : alphabetMap.values()) {
 
-        Log.d("Tag", currentSign.toString());
+            if (combination.size() >= currentNumberOfButtons) {
 
+                if (combination.subList(0, currentNumberOfButtons).equals(currentSign)) {
+
+                    isRight = true;
+                    break;
+                }
+            }
+        }
+        if (!isRight) {
+            Log.d("Tag","No matching sign detected."); // Read function
+            numberOfErrors++;
+            currentNumberOfButtons = 0;
+            currentSign.clear();
+        }
 
     }
     private void stopTouch() {
 
+        List<Buttons> rightCombination = new ArrayList<>();
+        boolean isRight = false;
+        for (List<Buttons> combination : alphabetMap.values()) {
+
+            if (combination.size() == currentNumberOfButtons) {
+
+                if (combination.equals(currentSign)) {
+                    rightCombination = combination;
+                    isRight = true;
+                    break;
+                }
+            }
+        }
+
+        if (isRight) {
+            String newKey = getKey(alphabetMap, rightCombination);
+            //Log.d("Tag", "SYMBOL FOUND: " + newKey); // Instead of log - read function
+            handleNewInput(newKey);
+        }
+        if (!isRight) {
+            Log.d("Tag", "No matching sign detected."); // Read function
+            numberOfErrors++;
+        }
+
+        currentNumberOfButtons = 0;
         currentSign.clear();
+    }
+
+
+
+    // Proper new input Handling
+    private void handleNewInput(String input){
+
+        // Adding to message / read / save / close / backspace etc.
+        // New commands to apply in alphabet -> enter, read, delete all, save, close app (maybe more)
+
+        switch(input){
+            // backspace
+            case ("back"): {
+                if (currentMessage.length() > 0) {
+                    currentMessage = currentMessage.substring(0, currentMessage.length() - 1);
+                }
+                break;
+            }
+            case ("return"): break; // To handle - I'm not sure what it should do
+            // Tab
+            case ("tab"): {
+                currentMessage += "\t";
+                break;
+            }
+            // All symbols
+            default: {
+                currentMessage += input;
+                break;
+            }
+
+        }
+        Log.d("Tag", "Current Message: " + currentMessage);
 
     }
+
+
+    // -------------------------FUNCTIONS executive --------------------------------
 
     // Creates Map of alphabet
     private void createMap(JSONArray alphabet) throws JSONException {
@@ -232,7 +311,6 @@ public class MainActivity extends AppCompatActivity  {
 
 
             for (int j = 0; j < seq.length; j++) {
-
 
                 if (seq[j].equals("b1")) tempToMap.add(Buttons.B1);
                 if (seq[j].equals("b2")) tempToMap.add(Buttons.B2);
@@ -258,5 +336,14 @@ public class MainActivity extends AppCompatActivity  {
                 (int) event.getX(),
                 (int) event.getY()
         );
+    }
+
+    private String getKey (Map<String, List<Buttons>> map, List<Buttons> value) {
+        for (Map.Entry<String, List<Buttons>> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }
