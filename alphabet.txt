@@ -40,7 +40,7 @@
 		{name: "L", seq: "b1;b3;b4;b1"},
 		{name: "M", seq: "b3;b1;b4;b2;b4;b1"},
 		{name: "N", seq: "b3;b1;b4;b2;b1"},
-		{name: "O", seq: "b2;b1;b3;b4;b1"},
+		{name: "O", seq: "b2;b1;b3;b4;b2;b1"},
 		{name: "P", seq: "b3;b1;b2;b3;b1"},
 		{name: "Q", seq: "b2;b1;b3;b4;b2;b4;b1"},
 		{name: "R", seq: "b3;b1;b2;b1"},
