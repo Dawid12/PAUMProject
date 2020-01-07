@@ -1,0 +1,1 @@
+{alphabetFileName: "alphabet.txt", outputFileName: "output.txt"}
