@@ -33,11 +33,15 @@ public class MainActivity extends AppCompatActivity
     private List<Buttons> currentSign = new ArrayList<>();
     private String currentMessage = "";
     private int numberOfErrors = 0;
+    private long startTimeMeasure;
+    private long startTime = System.currentTimeMillis();
+    private double timeElapsed, totalTime;
     private Configuration configuration;
     private int currentNumberOfButtons = 0;
-    private Button b1, b2, b3, b4;
-    private boolean isPressed = false;
+    private Button b1, b2, b3, b4, timeMeasure;
     private boolean isErrorInSequence = false;
+    private boolean isTimeMeasured = false;
+    private boolean isClicked = false;
     private View currentButton = null;
     //endregion
     //region OnCreate
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         b2 = findViewById(R.id.b2);
         b3 = findViewById(R.id.b3);
         b4 = findViewById(R.id.b4);
+        timeMeasure = findViewById(R.id.timeMeasureButton);
 
         // Listening to screen touch
         parent.setOnTouchListener(handleTouch);
@@ -133,22 +138,29 @@ public class MainActivity extends AppCompatActivity
             View tempView = null;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-
-                    isPressed = true;
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < 5; i++) {
                         if (i == 0) tempView = b1;
                         if (i == 1) tempView = b2;
                         if (i == 2) tempView = b3;
                         if (i == 3) tempView = b4;
+                        if (i == 4) tempView = timeMeasure;
                         if (isMotionEventInsideView(tempView, event)) {
                             currentButton = tempView;
-                            manageReachedButton(tempView);
+                            if (i != 4){
+                                manageReachedButton(tempView);
+                            }
+                            else {
+                                isClicked = true;
+                            }
                             return true;
                         }
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    isPressed = false;
+                    if (currentButton == timeMeasure && isClicked){
+                        handleTimeMeasure();
+                        isClicked = false;
+                    }
                     currentButton = null;
                     stopTouch();
                     view.performClick();
@@ -156,11 +168,12 @@ public class MainActivity extends AppCompatActivity
 
                 case MotionEvent.ACTION_MOVE:
 
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 0; i < 5; i++) {
                         if (i == 0) tempView = b1;
                         if (i == 1) tempView = b2;
                         if (i == 2) tempView = b3;
                         if (i == 3) tempView = b4;
+                        if (i == 4) tempView = timeMeasure;
                         if (currentButton == tempView
                                 && !isMotionEventInsideView(tempView, event)) {
                             currentButton = null;
@@ -169,7 +182,9 @@ public class MainActivity extends AppCompatActivity
                         if (currentButton != tempView
                                 && isMotionEventInsideView(tempView, event)) {
                             currentButton = tempView;
-                            manageReachedButton(tempView);
+                            if (i != 4) {
+                                manageReachedButton(tempView);
+                            }
                             return true;
                         }
                     }
@@ -183,6 +198,29 @@ public class MainActivity extends AppCompatActivity
             }
         }
     };
+
+    private void handleTimeMeasure() {
+
+
+        if (!isTimeMeasured){
+            Log.d("Tag", "TIME MEASURE: START");
+            isTimeMeasured = true;
+            startTimeMeasure = System.currentTimeMillis();
+            textToSpeech.speak("Custom time measure started", TextToSpeech.QUEUE_FLUSH, null);
+
+        }
+        else {
+
+            isTimeMeasured = false;
+            timeElapsed = (System.currentTimeMillis() - startTimeMeasure) / 1000.0;
+            totalTime = (System.currentTimeMillis() - startTime) / 1000.0;
+            Log.d("Tag", "TIME MEASURE: ELAPSED TIME: " + timeElapsed + " s Total time: " + totalTime + " s.");
+            textToSpeech.speak("Custom time measure stopped: " + timeElapsed + "seconds.", TextToSpeech.QUEUE_FLUSH, null);
+        }
+
+
+    }
+
     private boolean isMotionEventInsideView(View view, MotionEvent event)
     {
 
@@ -278,7 +316,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (!isRight)
         {
-            if (!isErrorInSequence) {
+            if (!isErrorInSequence && currentNumberOfButtons > 0) {
                 Log.d("Tag", "No matching sign detected."); // Read function
                 textToSpeech.speak("No matching sign detected", TextToSpeech.QUEUE_FLUSH, null);
                 numberOfErrors++;
