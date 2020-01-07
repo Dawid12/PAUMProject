@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity
     private Configuration configuration;
     private int currentNumberOfButtons = 0;
     private Button b1, b2, b3, b4;
-
     private boolean isPressed = false;
     private View currentButton = null;
     //endregion
@@ -73,7 +72,7 @@ public class MainActivity extends AppCompatActivity
 
         if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE))
         {
-            configuration = new Configuration(Environment.getExternalStorageDirectory() + File.separator + "PAUMProject", "alphabet.txt", "output.txt");
+            configuration = new Configuration(Environment.getExternalStorageDirectory() + File.separator + "PAUMProject", "conf.txt");
             configuration.loadConfiguration();
             try
             {
@@ -245,7 +244,7 @@ public class MainActivity extends AppCompatActivity
         if (!isRight)
         {
             Log.d("Tag","No matching sign detected."); // Read function
-            numberOfErrors++;
+            //numberOfErrors++;
             currentNumberOfButtons = 0;
             currentSign.clear();
         }
@@ -279,7 +278,7 @@ public class MainActivity extends AppCompatActivity
         if (!isRight)
         {
             Log.d("Tag", "No matching sign detected."); // Read function
-            numberOfErrors++;
+            //numberOfErrors++;
         }
 
         currentNumberOfButtons = 0;
@@ -303,6 +302,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     currentMessage = currentMessage.substring(0, currentMessage.length() - 1);
                 }
+                numberOfErrors += 1;
                 break;
             }
             case ("return"): break; // To handle - I'm not sure what it should do
@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity
             case ("."):
             {
                 currentMessage += input;
-                configuration.saveMessageToFile(currentMessage);
+                configuration.saveMessageToFile(currentMessage, numberOfErrors);
             }
             // All symbols
             default:

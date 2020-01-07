@@ -1,5 +1,6 @@
 package com.example.paumproject;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -18,30 +19,46 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static android.os.ParcelFileDescriptor.MODE_APPEND;
+
 public class Configuration
 {
     //region Members
     private JSONArray alphabet;
+    private JSONObject configuration;
     private String directory;
-    private String fileName;
+    private String configFileName;
     private String outputFileName;
+    private String alphabetFileName;
     private Map<String, List<Buttons>> alphabetMap = new TreeMap<>();
     //endregion
     //region Ctor
-    public Configuration(String directory, String fileName, String outputFileName)
+    public Configuration(String directory, String fileName)
     {
         this.directory = directory;
-        this.fileName = fileName;
-        this.outputFileName = outputFileName;
+        this.configFileName = fileName;
+        this.outputFileName = null;
+        this.alphabetFileName = null;
     }
     //endregion
     //region Methods
     public void loadConfiguration()
     {
-        String confJson = readFromFile( );
         try
         {
-            alphabet = new JSONArray(confJson);
+            String configurationString = readFromFile(configFileName);
+            if(configurationString != null)
+            {
+                configuration = new JSONObject(configurationString);
+                alphabetFileName = configuration.getString("alphabetFileName");
+                outputFileName = configuration.getString("outputFileName");
+
+                if(alphabetFileName != null)
+                {
+                    String alphabetString = readFromFile(alphabetFileName);
+                    alphabet = new JSONArray(alphabetString);
+                }
+            }
         }
         catch(org.json.JSONException ex)
         {
@@ -49,7 +66,7 @@ public class Configuration
 
     }
 
-    private String readFromFile()
+    private String readFromFile(String fileName)
     {
         File dir = new File(directory);
         if(dir.exists())
@@ -92,15 +109,35 @@ public class Configuration
         // Save your stream, don't forget to flush() it before closing it.
         try
         {
-            file.createNewFile();
+            if(!file.exists())
+                file.createNewFile();
+
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(data.getBytes());
+            fos.close();
+            /*8FileOutputStream fOut = ctx.openFileOutput(file, Context.MODE_APPEND);
+
+            if(!file.exists())
+                file.createNewFile();
+
+            OutputStreamWriter osw = new OutputStreamWriter(fOut);
+            osw.append(data);
+            osw.flush();
+            osw.close();*/
+
+
+           /* file.createNewFile();
             FileOutputStream fOut = new FileOutputStream(file);
             OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
             myOutWriter.append(data);
 
-            myOutWriter.close();
+
+
+
+            /*myOutWriter.close();
 
             fOut.flush();
-            fOut.close();
+            fOut.close();*/
         }
         catch (IOException e)
         {
@@ -139,9 +176,10 @@ public class Configuration
     {
         return alphabetMap;
     }
-    public void saveMessageToFile(String message)
+    public void saveMessageToFile(String message, int errorCount)
     {
-        writeToFile(message);
+        String jsonOut = "{\n text: \"" + message + "\",\n error: " + Integer.toString(errorCount) + "\n}";
+        writeToFile(jsonOut);
     }
     //endregion
 }
