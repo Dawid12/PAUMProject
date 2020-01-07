@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private int currentNumberOfButtons = 0;
     private Button b1, b2, b3, b4;
     private boolean isPressed = false;
+    private boolean isErrorInSequence = false;
     private View currentButton = null;
     //endregion
     //region OnCreate
@@ -225,30 +226,29 @@ public class MainActivity extends AppCompatActivity
         {
             e.printStackTrace();
         }
-        currentSign.add(current);
-        currentNumberOfButtons++;
-        boolean isRight = false;
-        for (List<Buttons> combination : configuration.getAlphabetDict().values())
-        {
+        if (!isErrorInSequence) { // To enter new sign -> new touch needed
+            currentSign.add(current);
+            currentNumberOfButtons++;
+            boolean isRight = false;
+            for (List<Buttons> combination : configuration.getAlphabetDict().values()) {
 
-            if (combination.size() >= currentNumberOfButtons)
-            {
+                if (combination.size() >= currentNumberOfButtons) {
 
-                if (combination.subList(0, currentNumberOfButtons).equals(currentSign))
-                {
-                    isRight = true;
-                    break;
+                    if (combination.subList(0, currentNumberOfButtons).equals(currentSign)) {
+                        isRight = true;
+                        break;
+                    }
                 }
             }
+            if (!isRight) {
+                Log.d("Tag", "No matching sign detected."); // Read function
+                textToSpeech.speak("No matching sign detected", TextToSpeech.QUEUE_FLUSH, null);
+                isErrorInSequence = true;
+                numberOfErrors++;
+                currentNumberOfButtons = 0;
+                currentSign.clear();
+            }
         }
-        if (!isRight)
-        {
-            Log.d("Tag","No matching sign detected."); // Read function
-            //numberOfErrors++;
-            currentNumberOfButtons = 0;
-            currentSign.clear();
-        }
-
     }
     private void stopTouch()
     {
@@ -272,16 +272,21 @@ public class MainActivity extends AppCompatActivity
         if (isRight)
         {
             String newKey = getKey(configuration.getAlphabetDict(), rightCombination);
+
             //Log.d("Tag", "SYMBOL FOUND: " + newKey); // Instead of log - read function
             handleNewInput(newKey);
         }
         if (!isRight)
         {
-            Log.d("Tag", "No matching sign detected."); // Read function
-            //numberOfErrors++;
+            if (!isErrorInSequence) {
+                Log.d("Tag", "No matching sign detected."); // Read function
+                textToSpeech.speak("No matching sign detected", TextToSpeech.QUEUE_FLUSH, null);
+                numberOfErrors++;
+            }
         }
 
         currentNumberOfButtons = 0;
+        isErrorInSequence = false;
         currentSign.clear();
     }
 
@@ -316,6 +321,7 @@ public class MainActivity extends AppCompatActivity
             {
                 currentMessage += input;
                 configuration.saveMessageToFile(currentMessage, numberOfErrors);
+                break;
             }
             // All symbols
             default:
@@ -326,8 +332,12 @@ public class MainActivity extends AppCompatActivity
 
         }
         Toast.makeText(getApplicationContext(),currentMessage,Toast.LENGTH_SHORT).show();
-        textToSpeech.speak(currentMessage, TextToSpeech.QUEUE_FLUSH, null);
-
+        if(!input.equals(".")) {
+            textToSpeech.speak(currentMessage, TextToSpeech.QUEUE_FLUSH, null);
+        }
+        else {
+            textToSpeech.speak(". Message saved", TextToSpeech.QUEUE_FLUSH, null);
+        }
         Log.d("Tag", "Current Message: " + currentMessage);
 
     }
