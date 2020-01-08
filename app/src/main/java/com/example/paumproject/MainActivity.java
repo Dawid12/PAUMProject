@@ -38,10 +38,10 @@ public class MainActivity extends AppCompatActivity
     private double timeElapsed, totalTime;
     private Configuration configuration;
     private int currentNumberOfButtons = 0;
-    private Button b1, b2, b3, b4, timeMeasure;
+    private Button b1, b2, b3, b4, timeMeasure, readText;
     private boolean isErrorInSequence = false;
     private boolean isTimeMeasured = false;
-    private boolean isClicked = false;
+    private boolean isClicked[] = {false, false};
     private View currentButton = null;
     //endregion
     //region OnCreate
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity
         b3 = findViewById(R.id.b3);
         b4 = findViewById(R.id.b4);
         timeMeasure = findViewById(R.id.timeMeasureButton);
+        readText = findViewById(R.id.readButton);
 
         // Listening to screen touch
         parent.setOnTouchListener(handleTouch);
@@ -138,28 +139,37 @@ public class MainActivity extends AppCompatActivity
             View tempView = null;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 6; i++) {
                         if (i == 0) tempView = b1;
                         if (i == 1) tempView = b2;
                         if (i == 2) tempView = b3;
                         if (i == 3) tempView = b4;
                         if (i == 4) tempView = timeMeasure;
+                        if (i == 5) tempView = readText;
                         if (isMotionEventInsideView(tempView, event)) {
                             currentButton = tempView;
-                            if (i != 4){
+                            if (i < 4){
                                 manageReachedButton(tempView);
                             }
-                            else {
-                                isClicked = true;
+                            else if (i == 4){
+                                isClicked[0] = true;
+                            }
+                            else if (i == 5){
+                                isClicked[1] = true;
                             }
                             return true;
                         }
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (currentButton == timeMeasure && isClicked){
+                    if (currentButton == timeMeasure && isClicked[0]){
                         handleTimeMeasure();
-                        isClicked = false;
+                        isClicked[0] = false;
+
+                    }
+                    if (isClicked[1]){
+                        handleCustomRead();
+                        isClicked[1] = false;
                     }
                     currentButton = null;
                     stopTouch();
@@ -168,12 +178,13 @@ public class MainActivity extends AppCompatActivity
 
                 case MotionEvent.ACTION_MOVE:
 
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 6; i++) {
                         if (i == 0) tempView = b1;
                         if (i == 1) tempView = b2;
                         if (i == 2) tempView = b3;
                         if (i == 3) tempView = b4;
                         if (i == 4) tempView = timeMeasure;
+                        if (i == 5) tempView = readText;
                         if (currentButton == tempView
                                 && !isMotionEventInsideView(tempView, event)) {
                             currentButton = null;
@@ -182,7 +193,7 @@ public class MainActivity extends AppCompatActivity
                         if (currentButton != tempView
                                 && isMotionEventInsideView(tempView, event)) {
                             currentButton = tempView;
-                            if (i != 4) {
+                            if (i < 4) {
                                 manageReachedButton(tempView);
                             }
                             return true;
@@ -218,8 +229,19 @@ public class MainActivity extends AppCompatActivity
             textToSpeech.speak("Custom time measure stopped: " + timeElapsed + "seconds.", TextToSpeech.QUEUE_FLUSH, null);
         }
 
-
     }
+
+    private void handleCustomRead() {
+
+        Log.d("Tag", "Custom read");
+        if(currentMessage.length() > 0) {
+            textToSpeech.speak(currentMessage, TextToSpeech.QUEUE_FLUSH, null);
+            Toast.makeText(getApplicationContext(),currentMessage,Toast.LENGTH_SHORT).show();
+        }
+        else {
+            textToSpeech.speak("Empty message", TextToSpeech.QUEUE_FLUSH, null);
+        }
+        }
 
     private boolean isMotionEventInsideView(View view, MotionEvent event)
     {
@@ -355,6 +377,14 @@ public class MainActivity extends AppCompatActivity
                 currentMessage += "\t";
                 break;
             }
+            case ("new"):
+            {
+                configuration.saveMessageToFile(currentMessage, numberOfErrors);
+                currentMessage = "";
+                currentNumberOfButtons = 0;
+                break;
+
+            }
             case ("."):
             {
                 currentMessage += input;
@@ -369,9 +399,17 @@ public class MainActivity extends AppCompatActivity
             }
 
         }
-        Toast.makeText(getApplicationContext(),currentMessage,Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(),input,Toast.LENGTH_SHORT).show();
         if(!input.equals(".")) {
-            textToSpeech.speak(currentMessage, TextToSpeech.QUEUE_FLUSH, null);
+            if (input.equals(" ")) {
+                textToSpeech.speak("space", TextToSpeech.QUEUE_FLUSH, null);
+            }
+            else if (input.equals("new")){
+                textToSpeech.speak("New message. Old saved.", TextToSpeech.QUEUE_FLUSH, null);
+            }
+            else {
+                textToSpeech.speak(input, TextToSpeech.QUEUE_FLUSH, null);
+            }
         }
         else {
             textToSpeech.speak(". Message saved", TextToSpeech.QUEUE_FLUSH, null);
