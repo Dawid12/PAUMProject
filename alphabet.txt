@@ -68,4 +68,6 @@
 		{name: "return", seq: "b2;b3"},
 		{name: "tab", seq: "b1;b4"},
 		{name: ",", seq: "b3"},
+		{name: "new", seq: "b1;b2;b1;b2;b1"},
+
 	]
