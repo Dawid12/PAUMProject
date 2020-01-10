@@ -5,6 +5,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
@@ -14,6 +15,8 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity
     private int numberOfErrors = 0;
     private long startTimeMeasure;
     private long startTime = System.currentTimeMillis();
+    private long endTime = System.currentTimeMillis();
     private double timeElapsed, totalTime;
     private Configuration configuration;
     private int currentNumberOfButtons = 0;
@@ -49,6 +53,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
+        getSupportActionBar().hide(); // hide the title bar
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN); //enable full screen
+
         setContentView(R.layout.activity_main);
 
         RelativeLayout parent;
@@ -64,7 +74,6 @@ public class MainActivity extends AppCompatActivity
 
         // Listening to screen touch
         parent.setOnTouchListener(handleTouch);
-
         textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener()
         {
             @Override
@@ -79,6 +88,7 @@ public class MainActivity extends AppCompatActivity
 
         if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) && checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE))
         {
+            startTime = System.currentTimeMillis();
             configuration = new Configuration(Environment.getExternalStorageDirectory() + File.separator + "PAUMProject", "conf.txt");
             configuration.loadConfiguration();
             try
@@ -379,7 +389,8 @@ public class MainActivity extends AppCompatActivity
             }
             case ("new"):
             {
-                configuration.saveMessageToFile(currentMessage, numberOfErrors);
+                endTime = System.currentTimeMillis();
+                configuration.saveMessageToFile(currentMessage, numberOfErrors, startTime, endTime);
                 currentMessage = "";
                 currentNumberOfButtons = 0;
                 break;
@@ -387,8 +398,9 @@ public class MainActivity extends AppCompatActivity
             }
             case ("."):
             {
+                endTime = System.currentTimeMillis();
                 currentMessage += input;
-                configuration.saveMessageToFile(currentMessage, numberOfErrors);
+                configuration.saveMessageToFile(currentMessage, numberOfErrors, startTime, endTime);
                 break;
             }
             // All symbols

@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -176,9 +177,17 @@ public class Configuration
     {
         return alphabetMap;
     }
-    public void saveMessageToFile(String message, int errorCount)
+    public void saveMessageToFile(String message, int errorCount, long startTime, long endTime)
     {
-        String jsonOut = "{\n text: \"" + message + "\",\n error: " + Integer.toString(errorCount) + "\n}";
+        Date startDate = new Date(startTime);
+        Date endDate = new Date(endTime);
+
+        String jsonOut = "{\n text: \"" + message;
+        jsonOut += "\",\n error: " + Integer.toString(errorCount);
+        jsonOut += ",\n startTime: " + startDate.toString();
+        jsonOut += ",\n endTime: " + endDate.toString();
+        jsonOut +=  "\n}";
+
         writeToFile(jsonOut);
     }
     //endregion
