@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
                         isClicked[0] = false;
 
                     }
-                    if (isClicked[1]){
+                    if (currentButton == readText && isClicked[1]){
                         handleCustomRead();
                         isClicked[1] = false;
                     }
