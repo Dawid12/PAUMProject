@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity
                             else if (i == 4){
                                 isClicked[0] = true;
                             }
-                            else if (i == 5){
+                            else {
                                 isClicked[1] = true;
                             }
                             return true;
@@ -380,8 +380,6 @@ public class MainActivity extends AppCompatActivity
                 numberOfErrors += 1;
                 break;
             }
-            case ("return"): break; // To handle - I'm not sure what it should do
-            // Tab
             case ("tab"):
             {
                 currentMessage += "\t";
@@ -393,6 +391,7 @@ public class MainActivity extends AppCompatActivity
                 configuration.saveMessageToFile(currentMessage, numberOfErrors, startTime, endTime);
                 currentMessage = "";
                 currentNumberOfButtons = 0;
+                numberOfErrors = 0;
                 break;
 
             }
