@@ -392,6 +392,7 @@ public class MainActivity extends AppCompatActivity
                 currentMessage = "";
                 currentNumberOfButtons = 0;
                 numberOfErrors = 0;
+                startTime = System.currentTimeMillis();
                 break;
 
             }
