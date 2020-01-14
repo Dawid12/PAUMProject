@@ -65,7 +65,6 @@
 		{name: "8", seq: "b2;b1;b4;b3;b2"},
 		{name: "9", seq: "b2;b1;b2;b4"},
 		{name: "back", seq: "b2;b1"},
-		{name: "return", seq: "b2;b3"},
 		{name: "tab", seq: "b1;b4"},
 		{name: ",", seq: "b3"},
 		{name: "new", seq: "b1;b2;b1;b2;b1"},
