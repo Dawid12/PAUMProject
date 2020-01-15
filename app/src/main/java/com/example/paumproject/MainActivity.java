@@ -284,7 +284,6 @@ public class MainActivity extends AppCompatActivity
         Buttons current = Buttons.B1;
         try
         {
-            // Assigning reached buttons to ENUMS and
             if (view == b1) assert true;
             if (view == b2) current = Buttons.B2;
             else if (view == b3) current = Buttons.B3;
@@ -343,7 +342,6 @@ public class MainActivity extends AppCompatActivity
         {
             String newKey = getKey(configuration.getAlphabetDict(), rightCombination);
 
-            //Log.d("Tag", "SYMBOL FOUND: " + newKey); // Instead of log - read function
             handleNewInput(newKey);
         }
         if (!isRight)
@@ -365,9 +363,6 @@ public class MainActivity extends AppCompatActivity
     // Proper new input Handling
     private void handleNewInput(String input)
     {
-        // Adding to message / read / save / close / backspace etc.
-        // New commands to apply in alphabet -> enter, read, delete all, save, close app (maybe more)
-
         switch(input)
         {
             // backspace
